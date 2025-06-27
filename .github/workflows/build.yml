@@ -1,0 +1,41 @@
+name: Build and Analyze with SonarCloud
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    name: Build, Test, and SonarCloud Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'  # ou la version exacte que tu utilises
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests with coverage
+        run: |
+          npm run test -- --coverage
+        env:
+          CI: true
+
+      # Optionnel : Lint du code
+      # - name: Run Linter
+      #   run: npm run lint
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: .
